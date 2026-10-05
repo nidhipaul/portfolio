@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="How close five of Earth's major ecosystems are to their estimated tipping points, shown as dials.">
+<title>At the Threshold</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --ground:      #f6f8f5;
+  --surface:     #ffffff;
+  --surface-2:   #eef2ed;
+  --ink:         #15201b;
+  --ink-2:       #4a5a52;
+  --ink-3:       #7b8a82;
+  --rule:        #dde4dc;
+  --rule-2:      #c9d3c8;
+  --canopy:      #1f6f5c;
+  --canopy-soft: #e3f0eb;
+  --ember:       #b84a26;
+  --ember-soft:  rgba(184,74,38,.16);
+  --track:       #e6ebe5;
+  --glow:        radial-gradient(900px 500px at 85% -10%, rgba(31,111,92,.08), transparent 60%);
+  --f-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --f-sans: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+* { box-sizing: border-box; }
+html { background: var(--ground); }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--glow), var(--ground);
+  color: var(--ink);
+  font: 15px/1.55 var(--f-sans);
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1120px; margin: 0 auto; padding: 28px 20px 64px; }
+
+/* ---------- top bar ---------- */
+.topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 40px; }
+.back {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--rule-2);
+  border-radius: 2px;
+  background: var(--surface);
+  font: 12px var(--f-mono); color: var(--ink-2);
+  text-decoration: none; cursor: pointer;
+  transition: border-color .12s, color .12s;
+}
+.back:hover { border-color: var(--canopy); color: var(--canopy); }
+.back:focus-visible { outline: 2px solid var(--canopy); outline-offset: 2px; }
+
+.eyebrow { font: 500 11px var(--f-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--canopy); margin: 0 0 12px; }
+h1 {
+  font-family: var(--f-display); font-weight: 700;
+  font-size: clamp(2.3rem, 6.5vw, 4.6rem);
+  line-height: 1; letter-spacing: -.04em; margin: 0 0 16px;
+}
+h1 em { font-style: normal; color: var(--ember); }
+.lede { margin: 0; font-size: 1.05rem; color: var(--ink-2); }
+
+/* ---------- selector tiles ---------- */
+.tiles {
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px;
+  margin: 40px 0 28px;
+}
+.tile {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 14px 14px 12px;
+  background: var(--surface);
+  border: 1px solid var(--rule); border-radius: 10px;
+  font: inherit; color: inherit; text-align: left; cursor: pointer;
+  transition: border-color .15s, background .15s, transform .15s;
+}
+.tile:hover { border-color: var(--rule-2); transform: translateY(-1px); }
+.tile[aria-selected="true"] { border-color: var(--canopy); background: var(--canopy-soft); }
+.tile:focus-visible { outline: 2px solid var(--canopy); outline-offset: 2px; }
+.t-name { font-weight: 600; font-size: 13.5px; line-height: 1.2; min-height: 2.4em; }
+.t-gap { font: 600 1.7rem/1 var(--f-display); letter-spacing: -.02em; color: var(--ember); font-variant-numeric: tabular-nums; }
+.t-gap small { font: 400 10.5px var(--f-mono); letter-spacing: .06em; color: var(--ink-3); margin-left: 4px; text-transform: uppercase; }
+.t-bar { position: relative; height: 4px; background: var(--track); border-radius: 2px; }
+.t-bar i { position: absolute; top: 0; bottom: 0; border-radius: 2px; }
+.t-bar .now { left: 0; background: var(--ink-2); }
+.t-bar .band { background: var(--ember); opacity: .55; }
+
+/* ---------- main stage ---------- */
+.stage {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 28px;
+  padding: 28px; background: var(--surface); border: 1px solid var(--rule); border-radius: 14px;
+}
+.dial-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.dial { width: 100%; max-width: 440px; display: block; }
+.dial .trk { stroke: var(--track); }
+.dial .band { stroke: var(--ember-soft); }
+.dial .band-edge { stroke: var(--ember); }
+.dial .now { stroke: var(--canopy); transition: d .6s ease; }
+.dial .needle { fill: var(--ink); }
+.dial text { font-family: var(--f-mono); fill: var(--ink-3); font-size: 11px; }
+.dial .big { font-family: var(--f-display); font-weight: 700; font-size: 58px; fill: var(--ink); letter-spacing: -2px; }
+.dial .unit { font-size: 12.5px; fill: var(--ink-2); letter-spacing: .04em; }
+.dial-cap { margin: 6px 0 0; text-align: center; font-size: 13.5px; color: var(--ink-2); max-width: 30em; }
+.dial-cap strong { color: var(--ember); }
+
+.info h2 { font: 700 2rem/1.1 var(--f-display); letter-spacing: -.03em; margin: 0 0 6px; }
+.info .metric { font: 12px var(--f-mono); color: var(--ink-3); margin: 0 0 20px; }
+.stats { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.stats li { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr); gap: 4px 18px; padding: 16px 0; border-top: 1px solid var(--rule); }
+.stats li:last-child { border-bottom: 1px solid var(--rule); }
+.s-v { font: 600 1.75rem/1.05 var(--f-display); letter-spacing: -.02em; color: var(--canopy); grid-row: span 2; }
+.s-l { font-size: 14.5px; color: var(--ink); }
+.s-src { font: 10.5px/1.5 var(--f-mono); color: var(--ink-3); }
+
+.sources-card { margin-top: 20px; padding: 18px 20px; background: var(--surface-2); border-radius: 3px; }
+.sources-card h2 { margin: 0; font: 500 10.5px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--canopy); }
+.sources-card ul { margin: 10px 0 0; padding-left: 18px; font-size: 13.5px; color: var(--ink-2); }
+
+/* ---------- comparison ---------- */
+.compare { margin-top: 36px; padding: 22px 28px 18px; border: 1px solid var(--rule); border-radius: 14px; background: var(--surface); }
+.compare h3 { margin: 0 0 4px; font: 600 1.1rem var(--f-display); letter-spacing: -.01em; }
+.compare p { margin: 0 0 14px; font-size: 13px; color: var(--ink-3); }
+.strip { position: relative; height: 140px; }
+.strip svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.strip .axis { stroke: var(--rule-2); }
+.strip .tick { font: 10.5px var(--f-mono); fill: var(--ink-3); }
+.strip .lane { stroke: var(--track); }
+.strip .rng { stroke: var(--ember); stroke-opacity: .45; stroke-linecap: round; }
+.strip .dot { fill: var(--ink-2); stroke: var(--surface); stroke-width: 2; }
+.strip .lbl { font: 11.5px var(--f-sans); fill: var(--ink-2); }
+.strip .gp { font: 600 11px var(--f-mono); fill: var(--ember); }
+.strip g.on .dot { fill: var(--canopy); }
+.strip g.on .lbl { fill: var(--ink); font-weight: 600; }
+.strip g.on .rng { stroke-opacity: 1; }
+.strip g { cursor: pointer; }
+
+/* ---------- explainer (same look as the Forest Ledger .explainer) ---------- */
+.explainer {
+  margin-bottom: 20px;
+  padding: 18px 20px;
+  background: var(--surface-2);
+  border-radius: 3px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+.explainer h2 {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--canopy);
+  margin: 0;
+}
+.explainer p { margin: 0; font-size: 13.5px; color: var(--ink-2); }
+.explainer p strong { color: var(--ink); font-weight: 600; }
+.explainer-note {
+  margin-top: 4px !important;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule-2);
+  font-family: var(--f-mono);
+  font-size: 11.5px !important;
+  color: var(--ink-3) !important;
+}
+.site-foot { max-width: 1120px; margin: 0 auto; padding: 18px 20px 36px; border-top: 1px solid var(--rule); font-size: 13px; color: var(--ink-3); }
+.site-foot a { color: var(--canopy); text-decoration: none; }
+.site-foot a:hover { text-decoration: underline; }
+
+@media (max-width: 900px) {
+  .tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .stage { grid-template-columns: minmax(0, 1fr); padding: 22px 18px; }
+}
+@media (max-width: 560px) {
+  .wrap { padding-inline: 16px; }
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stats li { grid-template-columns: minmax(0, 1fr); }
+  .s-v { grid-row: auto; }
+  .compare { padding: 18px 14px 12px; }
+  .strip { height: 170px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <a class="back" href="../index.html">&larr; Back</a>
+  </div>
+
+  <header>
+    <p class="eyebrow">Five ecosystems &middot; one question</p>
+    <h1>At the <em>threshold</em></h1>
+    <p class="lede">Each of these ecosystems has an estimated tipping point, a level of damage beyond which loss starts to feed on itself. Pick one to see how far along it is and what depends on it.</p>
+  </header>
+  <section class="compare">
+    <h3>Closest to the tipping point</h3>
+    <p style="margin-bottom: 10px">Ranked by points left before each tipping range begins, closest first. Click a row to open it below.</p>
+    <p>Dot = current level.<br>
+      Orange line = estimated tipping range.</p>
+    <div class="strip"><svg id="strip" role="img" aria-label="Current level and tipping range for all five ecosystems"></svg></div>
+  </section>
+
+  <div class="tiles" id="tiles" role="tablist" aria-label="Ecosystems"></div>
+
+  <aside class="explainer">
+    <h2>How to read these numbers</h2>
+    <p>Each ecosystem is measured in its own terms (reef area degraded, forest cleared, summer ice volume lost, mangrove area lost, grassland converted). <strong>All are percentages, so they share a 0&ndash;100% scale, but they are not the same quantity.</strong></p>
+    <p class="explainer-note">Tipping ranges are scientific estimates with wide uncertainty.</p>
+  </aside>
+  <section class="stage" id="stage" role="tabpanel" aria-live="polite">
+    <div class="dial-wrap">
+      <svg class="dial" id="dial" viewBox="-24 0 368 200" role="img"></svg>
+      <p class="dial-cap" id="dial-cap"></p>
+    </div>
+    <div class="info" id="info"></div>
+  </section>
+
+  <section class="sources-card" id="sources-card" aria-live="polite"></section>
+
+
+</div>
+<footer class="site-foot">
+  &copy; <a href="https://www.linkedin.com/in/nidhi-paul-3a640936" target="_blank" rel="noopener">Nidhi Paul</a>, 2026  
+</footer>
+
+<!-- Inlined copy of ecosystems.csv so the page works offline / from file:// -->
+<script type="text/csv" id="ecosystems-csv">
+ecosystem_id,ecosystem_name,metric_type,metric_label,value,value_numeric,unit,tipping_range_low,tipping_range_high,sources
+coral-reefs,Coral Reefs,threshold,Reef area under severe threat,50,50,% degraded,70,90,"IPBES Global Assessment (2019); GCRMN Status of Coral Reefs of the World (2020); IPCC AR6 (2021)"
+coral-reefs,Coral Reefs,stat,Marine species supported,25%,25,%,,,"IPBES Global Assessment (2019); GCRMN Status of Coral Reefs of the World (2020)"
+coral-reefs,Coral Reefs,stat,People dependent on reefs,500M,500000000,people,,,"IPBES Global Assessment (2019)"
+coral-reefs,Coral Reefs,stat,Reef area under bleaching-level heat stress (2024),77%,77,%,,,"GCRMN Status of Coral Reefs of the World (2020); Hughes et al. Science (2018)"
+amazon-rainforest,Amazon Rainforest,threshold,Original forest cleared,17,17,% deforested,20,25,"Lovejoy & Nobre Science Advances (2018); INPE; Armstrong McKay et al. Science (2022)"
+amazon-rainforest,Amazon Rainforest,stat,Carbon stored,150–200 Gt,,GtC,,,"Global Carbon Project; Lovejoy & Nobre Science Advances (2018)"
+amazon-rainforest,Amazon Rainforest,stat,Share of Earth's species found here,10%,10,%,,,"IPBES Global Assessment (2019)"
+amazon-rainforest,Amazon Rainforest,stat,Rainfall self-generated by the forest,~50%,50,%,,,"Lovejoy & Nobre Science Advances (2018)"
+arctic-sea-ice,Arctic Sea Ice,threshold,Summer ice volume lost since 1979,75,75,% volume lost,80,95,"NSIDC; IPCC AR6 WG1 (2021); Notz & Stroeve Science (2016)"
+arctic-sea-ice,Arctic Sea Ice,stat,Arctic warming rate vs global average,4×,4,× faster,,,"IPCC AR6 WG1 (2021)"
+arctic-sea-ice,Arctic Sea Ice,stat,September extent decline per decade,13%,13,% per decade,,,"NSIDC; IPCC AR6 WG1 (2021)"
+arctic-sea-ice,Arctic Sea Ice,stat,Ice-free Arctic summers projected,~2030s,,decade,,,"IPCC AR6 WG1 (2021); Armstrong McKay et al. Science (2022)"
+mangroves,Mangroves & Wetlands,threshold,Global mangrove area lost,35,35,% destroyed,40,60,"Global Mangrove Watch; IUCN Red List of Ecosystems; Friess et al. (2019)"
+mangroves,Mangroves & Wetlands,stat,Carbon storage vs tropical rainforest (per hectare),4×,4,× more,,,"Global Mangrove Watch; Friess et al. (2019)"
+mangroves,Mangroves & Wetlands,stat,Coastal people protected from storms,100M+,100000000,people,,,"IUCN Red List of Ecosystems"
+mangroves,Mangroves & Wetlands,stat,Tropical fish species using mangroves as nurseries,75%,75,%,,,"Friess et al. Annual Review of Environment and Resources (2019)"
+grasslands,Grasslands & Savannas,threshold,Original grassland converted,50,50,% converted,55,70,"IPBES Global Assessment (2019); WWF Living Planet Report; WWF Plowprint Report"
+grasslands,Grasslands & Savannas,stat,Share of Earth's land surface once covered,40%,40,%,,,"IPBES Global Assessment (2019)"
+grasslands,Grasslands & Savannas,stat,Great Plains converted per year (North America),1.6M acres,647497,hectares/year,,,"WWF Plowprint Report"
+grasslands,Grasslands & Savannas,stat,Time to rebuild grassland soil once plowed,Centuries,,years,,,"IPBES Land Degradation Assessment (2018)"
+</script>
+
+<script>
+(function () {
+  // Tolerant CSV parser: quoted fields with "" escapes, and whitespace
+  // outside quotes is ignored (e.g. `,  "a; b"` parses as `a; b`).
+  function parseCSV(text) {
+    var rows = [], row = [], field = '', i = 0, inQuotes = false, quoted = false;
+    function endField() { row.push(quoted ? field : field.trim()); field = ''; quoted = false; }
+    while (i < text.length) {
+      var c = text[i];
+      if (inQuotes) {
+        if (c === '"' && text[i + 1] === '"') { field += '"'; i += 2; continue; }
+        if (c === '"') { inQuotes = false; i++; continue; }
+        field += c; i++; continue;
+      }
+      if (c === '"' && field.trim() === '') { field = ''; inQuotes = true; quoted = true; i++; continue; }
+      if (c === ',') { endField(); i++; continue; }
+      if (c === '\r') { i++; continue; }
+      if (c === '\n') { endField(); rows.push(row); row = []; i++; continue; }
+      if (quoted && (c === ' ' || c === '\t')) { i++; continue; }
+      field += c; i++;
+    }
+    if (field !== '' || row.length) { endField(); rows.push(row); }
+    rows = rows.filter(function (r) { return r.some(function (f) { return f !== ''; }); });
+    var head = rows.shift();
+    return rows.map(function (r) {
+      var o = {};
+      head.forEach(function (h, j) { o[h.trim()] = r[j] == null ? '' : r[j]; });
+      return o;
+    });
+  }
+
+  function num(s) { var n = parseFloat(s); return isNaN(n) ? null : n; }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function splitSources(s) { return s.split(';').map(function (x) { return x.trim(); }).filter(Boolean); }
+
+  var byId = {}, order = [];
+  parseCSV(document.getElementById('ecosystems-csv').textContent.trim()).forEach(function (r) {
+    var id = r.ecosystem_id;
+    if (!byId[id]) { byId[id] = { id: id, name: r.ecosystem_name, threshold: null, stats: [] }; order.push(id); }
+    if (r.metric_type === 'threshold') {
+      byId[id].threshold = {
+        label: r.metric_label,
+        value: num(r.value_numeric !== '' ? r.value_numeric : r.value),
+        unit: r.unit.replace(/^%\s*/, ''),
+        low: num(r.tipping_range_low),
+        high: num(r.tipping_range_high),
+        sources: splitSources(r.sources)
+      };
+    } else {
+      byId[id].stats.push({ label: r.metric_label, value: r.value, sources: splitSources(r.sources) });
+    }
+  });
+  // Closest to tipping first.
+  var eco = order.map(function (id) { return byId[id]; }).filter(function (e) { return e.threshold; });
+  eco.forEach(function (e) { e.gap = Math.max(0, e.threshold.low - e.threshold.value); });
+  eco.sort(function (a, b) { return a.gap - b.gap || b.threshold.value - a.threshold.value; });
+
+  var selected = eco[0].id;
+  var tilesEl = document.getElementById('tiles');
+  var dialEl = document.getElementById('dial');
+  var capEl = document.getElementById('dial-cap');
+  var infoEl = document.getElementById('info');
+  var sourcesEl = document.getElementById('sources-card');
+  var stripEl = document.getElementById('strip');
+
+  // ---- tiles ----
+  tilesEl.innerHTML = eco.map(function (e) {
+    var t = e.threshold;
+    return '<button class="tile" type="button" role="tab" id="tab-' + e.id + '" data-id="' + e.id + '" aria-controls="stage">' +
+      '<span class="t-name">' + esc(e.name) + '</span>' +
+      '<span class="t-gap">' + e.gap + '<small>pts to go</small></span>' +
+      '<span class="t-bar" aria-hidden="true"><i class="band" style="left:' + t.low + '%;width:' + (t.high - t.low) + '%"></i>' +
+      '<i class="now" style="width:' + t.value + '%"></i></span>' +
+    '</button>';
+  }).join('');
+
+  // ---- dial ----
+  var CX = 160, CY = 170, R = 130, W = 22;
+  function pt(p, r) {
+    var a = Math.PI * (1 - p / 100);
+    return [CX + r * Math.cos(a), CY - r * Math.sin(a)];
+  }
+  function arc(p1, p2, r) {
+    var a = pt(p1, r), b = pt(p2, r);
+    return 'M' + a[0].toFixed(2) + ' ' + a[1].toFixed(2) + ' A' + r + ' ' + r + ' 0 0 1 ' + b[0].toFixed(2) + ' ' + b[1].toFixed(2);
+  }
+  function renderDial(e) {
+    var t = e.threshold;
+    var ticks = [0, 25, 50, 75, 100].map(function (p) {
+      var q = pt(p, R + W / 2 + 12);
+      var anchor = p === 50 ? 'middle' : p < 50 ? 'end' : 'start';
+      if (p === 0 || p === 100) anchor = 'middle';
+      var y = p === 0 || p === 100 ? q[1] + 14 : q[1];
+      return '<text x="' + q[0].toFixed(1) + '" y="' + y.toFixed(1) + '" text-anchor="' + anchor + '">' + p + '%</text>';
+    }).join('');
+    var n1 = pt(t.value, R - W / 2 - 6), n2 = pt(t.value, R + W / 2 + 4);
+    var b1 = pt(t.low, R - W / 2), b2 = pt(t.low, R + W / 2);
+    dialEl.setAttribute('aria-label', e.name + ': ' + t.value + '% ' + t.unit + '. Estimated tipping range ' + t.low + ' to ' + t.high + '%.');
+    dialEl.innerHTML =
+      '<path class="trk" d="' + arc(0, 100, R) + '" fill="none" stroke-width="' + W + '"/>' +
+      '<path class="band" d="' + arc(t.low, t.high, R) + '" fill="none" stroke-width="' + W + '"/>' +
+      '<path class="now" d="' + arc(0, Math.max(t.value, 0.5), R) + '" fill="none" stroke-width="' + (W - 12) + '" stroke-linecap="round"/>' +
+      '<line class="band-edge" x1="' + b1[0] + '" y1="' + b1[1] + '" x2="' + b2[0] + '" y2="' + b2[1] + '" stroke-width="2.5"/>' +
+      '<line x1="' + n1[0] + '" y1="' + n1[1] + '" x2="' + n2[0] + '" y2="' + n2[1] + '" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>' +
+      ticks +
+      '<text class="big" x="' + CX + '" y="' + (CY - 22) + '" text-anchor="middle">' + t.value + '%</text>' +
+      '<text class="unit" x="' + CX + '" y="' + (CY - 2) + '" text-anchor="middle">' + esc(t.unit) + '</text>';
+    capEl.innerHTML = 'Tipping range <strong>' + t.low + '&ndash;' + t.high + '%</strong>. ' +
+      (e.gap > 0 ? '<strong>' + e.gap + ' points</strong> left before the low end.' : 'Already inside the range.');
+  }
+
+  // ---- info ----
+  function renderInfo(e) {
+    var t = e.threshold;
+    var all = [];
+    [t.sources].concat(e.stats.map(function (s) { return s.sources; })).forEach(function (list) {
+      list.forEach(function (s) { if (all.indexOf(s) < 0) all.push(s); });
+    });
+    infoEl.innerHTML =
+      '<h2>' + esc(e.name) + '</h2>' +
+      '<p class="metric">' + esc(t.label) + ' &middot; ' + t.sources.map(esc).join('; ') + '</p>' +
+      '<ul class="stats">' + e.stats.map(function (s) {
+        return '<li><span class="s-v">' + esc(s.value) + '</span><span class="s-l">' + esc(s.label) + '</span>' +
+          '<span class="s-src">' + s.sources.map(esc).join('; ') + '</span></li>';
+      }).join('') + '</ul>';
+    sourcesEl.innerHTML = '<h2>Sources</h2><ul>' +
+      all.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul>';
+  }
+
+  // ---- comparison strip ----
+  function renderStrip() {
+    var w = stripEl.clientWidth || 800;
+    var narrow = w < 520;
+    var left = narrow ? 8 : 170, right = narrow ? 14 : 78, top = 8, laneH = narrow ? 30 : 23;
+    var plotW = w - left - right;
+    var x = function (p) { return left + plotW * p / 100; };
+    var h = top + laneH * eco.length + 22;
+    stripEl.parentNode.style.height = h + 'px';
+    stripEl.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    var out = '';
+    [0, 25, 50, 75, 100].forEach(function (p) {
+      out += '<line class="axis" x1="' + x(p) + '" x2="' + x(p) + '" y1="' + top + '" y2="' + (h - 18) + '" stroke-dasharray="2 4"/>' +
+        '<text class="tick" x="' + x(p) + '" y="' + (h - 4) + '" text-anchor="middle">' + p + '%</text>';
+    });
+    eco.forEach(function (e, i) {
+      var t = e.threshold;
+      var y = top + laneH * i + laneH / 2 + (narrow ? 6 : 0);
+      out += '<g data-id="' + e.id + '" class="' + (e.id === selected ? 'on' : '') + '">' +
+        '<rect x="0" y="' + (y - laneH / 2 - (narrow ? 6 : 0)) + '" width="' + w + '" height="' + laneH + '" fill="transparent"/>' +
+        (narrow
+          ? '<text class="lbl" x="' + left + '" y="' + (y - 8) + '">' + esc(e.name) + ' <tspan class="gp">' + e.gap + ' pts to go</tspan></text>'
+          : '<text class="lbl" x="' + (left - 14) + '" y="' + (y + 4) + '" text-anchor="end">' + esc(e.name) + '</text>' +
+            '<text class="gp" x="' + (w - 2) + '" y="' + (y + 4) + '" text-anchor="end">' + e.gap + ' pts</text>') +
+        '<line class="lane" x1="' + x(0) + '" x2="' + x(100) + '" y1="' + y + '" y2="' + y + '" stroke-width="1"/>' +
+        '<line class="rng" x1="' + x(t.low) + '" x2="' + x(t.high) + '" y1="' + y + '" y2="' + y + '" stroke-width="6"/>' +
+        '<circle class="dot" cx="' + x(t.value) + '" cy="' + y + '" r="6"/>' +
+        '<title>' + esc(e.name + ': ' + t.value + '%, tipping range ' + t.low + '–' + t.high + '%') + '</title>' +
+      '</g>';
+    });
+    stripEl.innerHTML = out;
+  }
+
+  function select(id, focus) {
+    selected = id;
+    var e = byId[id];
+    Array.prototype.forEach.call(tilesEl.children, function (b) {
+      var on = b.dataset.id === id;
+      b.setAttribute('aria-selected', String(on));
+      b.tabIndex = on ? 0 : -1;
+      if (on && focus) b.focus();
+    });
+    document.getElementById('stage').setAttribute('aria-labelledby', 'tab-' + id);
+    renderDial(e);
+    renderInfo(e);
+    Array.prototype.forEach.call(stripEl.querySelectorAll('g[data-id]'), function (g) {
+      g.setAttribute('class', g.dataset.id === id ? 'on' : '');
+    });
+  }
+
+  tilesEl.addEventListener('click', function (ev) {
+    var b = ev.target.closest('.tile');
+    if (b) select(b.dataset.id);
+  });
+  tilesEl.addEventListener('keydown', function (ev) {
+    var idx = eco.findIndex(function (e) { return e.id === selected; });
+    if (ev.key === 'ArrowRight' || ev.key === 'ArrowDown') idx = (idx + 1) % eco.length;
+    else if (ev.key === 'ArrowLeft' || ev.key === 'ArrowUp') idx = (idx - 1 + eco.length) % eco.length;
+    else if (ev.key === 'Home') idx = 0;
+    else if (ev.key === 'End') idx = eco.length - 1;
+    else return;
+    ev.preventDefault();
+    select(eco[idx].id, true);
+  });
+  stripEl.addEventListener('click', function (ev) {
+    var g = ev.target.closest('g[data-id]');
+    if (g) { select(g.dataset.id); document.getElementById('tiles').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  });
+
+  var resizeTimer;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () { renderStrip(); select(selected); }, 120);
+  });
+
+  renderStrip();
+  select(selected);
+})();
+</script>
+</body>
+</html>
