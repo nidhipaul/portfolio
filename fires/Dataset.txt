@@ -1,0 +1,10 @@
+Data downloaded from 
+
+
+https://firms.modaps.eosdis.nasa.gov/download/
+
+WORLD
+
+VIIRS NOAA-21
+
+Jan 1st 2026 - October 4th 2026
